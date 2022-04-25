@@ -1,0 +1,102 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  name      String
+  imageUrl  String?
+
+  Session Session[]
+  
+  @@map("users")
+  
+}
+
+model Term {
+  id        Int      @id @default(autoincrement())
+  number    Int      @unique
+  createdAt DateTime @default(now())
+
+  disciplines Discipline[]
+
+  @@map("terms")
+}
+
+model Teacher {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  createdAt DateTime @default(now())
+
+  disciplinesTeachers DisciplineTeacher[]
+
+  @@map("teachers")
+}
+
+model Discipline {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  createdAt DateTime @default(now())
+
+  term   Term @relation(fields: [termId], references: [id])
+  termId Int
+
+  disciplinesTeachers DisciplineTeacher[]
+
+  @@map("disciplines")
+}
+
+model Category {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  createdAt DateTime @default(now())
+
+  tests Test[]
+
+  @@map("categories")
+}
+
+model DisciplineTeacher {
+  id Int @id @default(autoincrement())
+
+  teacherId Int
+  teacher   Teacher @relation(fields: [teacherId], references: [id])
+
+  disciplineId Int
+  discipline   Discipline @relation(fields: [disciplineId], references: [id])
+
+  tests Test[]
+
+  @@map("disciplinesteachers")
+}
+
+model Test {
+  id        Int      @id @default(autoincrement())
+  name      String
+  pdfUri    String
+  createdAt DateTime @default(now())
+
+  categoryId Int
+  category   Category @relation(fields: [categoryId], references: [id])
+
+  disciplineTeacherId Int
+  disciplineTeacher   DisciplineTeacher @relation(fields: [disciplineTeacherId], references: [id])
+
+  @@map("tests")
+}
+
+model Session {
+  id     Int  @id @default(autoincrement())
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
+
+  @@map("sessions")
+}
